@@ -1,52 +1,63 @@
 pipeline {
-    agent any
+    agent any 
+    environment {
+        CHAT_WEBHOOK_URL = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ec143d22-0538-48a7-b73c-6912e8caff41"
+        JOB_NAME="${JOB_BASE_NAME}"
+        BUILD_NUM="$BUILD_NUMBER"
+        BUILD_TIME="$BUILD_TIMESTAMP"
+        URL_JOB="${BUILD_URL}"
+        URL_LOG="${BUILD_URL}console"
+    }
     stages {
-        stage('Build') {
+        stage('ready') {
             steps {
-                script {
-                    // 构建操作
-                }
+                echo '准备开始构建'
+            }
+        }
+        stage('build') {
+            steps {
+                echo '正在构建中'
             }
         }
     }
-    post {
-        success {
-            script {
-                // 获取构建用户信息
-                def buildUser = env.BUILD_USER
-                // 获取构建时间
-                def buildTime = currentBuild.durationString
-                // 获取项目名称
-                def jobName = env.JOB_NAME
-                // 企业微信群机器人的Webhook地址
-                def webhookUrl = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ec143d22-0538-48a7-b73c-6912e8caff41'
-                // 构建通知消息
-                def message = "## ${jobName} 构建成功\n" +
-                        "- 构建时间：${buildTime}\n" +
-                        "- 查看详情：[点击查看](${BUILD_URL})" +
-                        "- @${buildUser}"
-                // 发送通知到企业微信群
-                sh "curl -X POST -H 'Content-Type: application/json' -d '{\"msgtype\":\"markdown\", \"markdown\":{\"content\":\"${message}\"}}" ${webhookUrl}
-            }
+     post{
+        success{
+            sh '''
+            curl "${CHAT_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d '
+               {
+                    "msgtype": "markdown",
+                    "markdown": {
+                     "content": "<font color=#FFA500>**Jenkins任务构建结果通知**</font>
+                     >构建时间：<font color=#696969>'"${BUILD_TIME}"'</font>
+                     >任务名称：<font color=#696969>'"${JOB_NAME}"'</font>
+                     >任务地址：[点击查看]('"${URL_JOB}"')
+                     >构建日志：[点击查看]('"${URL_LOG}"')
+                     >构建状态：<font color=#008000>**Success**</font>"
+                    }
+               }
+            '
+            '''
         }
-         failure {
-            script {
-                // 获取构建用户信息
-                def buildUser = env.BUILD_USER
-                // 获取构建时间
-                def buildTime = currentBuild.durationString
-                // 获取项目名称
-                def jobName = env.JOB_NAME
-                // 企业微信群机器人的Webhook地址
-                def webhookUrl = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ec143d22-0538-48a7-b73c-6912e8caff41'
-                // 构建通知消息
-                def message = "## ${jobName} 构建失败\n" +
-                        "- 构建时间：${buildTime}\n" +
-                        "- 查看详情：[点击查看](${BUILD_URL})" +
-                        "- @${buildUser}"
-                // 发送通知到企业微信群
-                sh "curl -X POST -H 'Content-Type: application/json' -d '{\"msgtype\":\"markdown\", \"markdown\":{\"content\":\"${message}\"}}" ${webhookUrl}
-            }
+        failure{
+            sh '''
+            curl "${CHAT_WEBHOOK_URL}" \
+            -H "Content-Type: application/json" \
+            -d '
+               {
+                    "msgtype": "markdown",
+                    "markdown": {
+                     "content": "<font color=#FFA500>**Jenkins任务构建结果通知**</font>
+                     >构建时间：<font color=#696969>'"${BUILD_TIME}"'</font>
+                     >任务名称：<font color=#696969>'"${JOB_NAME}"'</font>
+                     >任务地址：[点击查看]('"${URL_JOB}"')
+                     >构建日志：[点击查看]('"${URL_LOG}"')
+                     >构建状态：<font color=#FF0000>**Failure**</font>"
+                    }
+               }
+            '
+            '''
         }
     }
 }
