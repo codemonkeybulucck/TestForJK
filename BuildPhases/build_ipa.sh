@@ -8,6 +8,7 @@ RevisionNumber=$(git rev-list --count HEAD --no-merges)
 SDK_BUILD=$(git rev-parse --short HEAD)
 BUILD_CONFIGURATION="Debug"
 SCHEME="TestForJK"
+PRODUCT_NAME="产品名称"
 TEMP=$1
 if [[ $TEMP == "clean" ]]; then
     CLEAN="clean"
@@ -179,6 +180,11 @@ echo "Package ${SCHEME}_V${DEMO_VERSION}_B${RevisionNumber} Done"
 
 echo "Finish Archive using: $(($(date +%s)-$BUILDPACKAGE_STARTTIME))s"
 
+echo "post notification to ${BUILD_USER}"
+echo "产品名： ${PRODUCT_NAME}"
+echo "构建任务： ${URL_JOB}"
+echo "构建日志： ${URL_LOG}"
+echo "构建路径： ${IPA_PATH}"
 
 curl 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ec143d22-0538-48a7-b73c-6912e8caff41' \
 	-H 'Content-Type: application/json' \
@@ -186,11 +192,11 @@ curl 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ec143d22-0538-48a7-b7
         {
             "msgtype": "markdown",
             "markdown": {
-                "content": "<font color=#FFA500>**Jenkins任务构建结果通知**</font>
+                "content": "<font color=#FFA500>**'${PRODUCT_NAME}'构建成功**</font>
+                >下载地址：<font color=#696969>'"${IPA_PATH}"'</font>
                 >构建时间：<font color=#696969>'"${BUILD_TIME}"'</font>
-                >任务名称：<font color=#696969>'"${JOB_NAME}"'</font>
                 >任务地址：[点击查看]('"${URL_JOB}"')
                 >构建日志：[点击查看]('"${URL_LOG}"')
-                >构建状态：<font color=#008000>**Success**</font>"
+                >@'${BUILD_USER}'"
             }
         }'
