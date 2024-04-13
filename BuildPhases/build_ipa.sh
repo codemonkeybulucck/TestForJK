@@ -179,25 +179,3 @@ rm -rf "${SCHEME}_V${DEMO_VERSION}_B${RevisionNumber}.xcarchive"
 echo "Package ${SCHEME}_V${DEMO_VERSION}_B${RevisionNumber} Done"
 
 echo "Finish Archive using: $(($(date +%s)-$BUILDPACKAGE_STARTTIME))s"
-
-echo "post notification to ${BUILD_USER}"
-echo "产品名： ${PRODUCT_NAME}"
-echo "构建任务： ${URL_JOB}"
-echo "构建日志： ${URL_LOG}"
-echo "构建路径： ${IPA_PATH}"
-echo "耗时:${BUILD_TIMESTAMP}"
-
-curl 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ec143d22-0538-48a7-b73c-6912e8caff41' \
-	-H 'Content-Type: application/json' \
-    -d '
-        {
-            "msgtype": "markdown",
-            "markdown": {
-                "content": "<font color=#FFA500>**'${PRODUCT_NAME}'构建成功**</font>
-                >下载地址：<font color=#696969>'"${IPA_PATH}"'</font>
-                >构建时间：<font color=#696969>'"${BUILD_TIME}"'</font> 耗时：<font color=#696969>'"${BUILD_TIMESTAMP}"'</font>
-                >任务地址：[点击查看]('"${URL_JOB}"')
-                >构建日志：[点击查看]('"${URL_LOG}"')
-                >@'${BUILD_USER}'"
-            }
-        }'
