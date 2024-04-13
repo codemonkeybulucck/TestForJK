@@ -179,3 +179,18 @@ echo "Package ${SCHEME}_V${DEMO_VERSION}_B${RevisionNumber} Done"
 
 echo "Finish Archive using: $(($(date +%s)-$BUILDPACKAGE_STARTTIME))s"
 
+
+curl 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ec143d22-0538-48a7-b73c-6912e8caff41' \
+	-H 'Content-Type: application/json' \
+    -d '
+        {
+            "msgtype": "markdown",
+            "markdown": {
+                "content": "<font color=#FFA500>**Jenkins任务构建结果通知**</font>
+                >构建时间：<font color=#696969>'"${BUILD_TIME}"'</font>
+                >任务名称：<font color=#696969>'"${JOB_NAME}"'</font>
+                >任务地址：[点击查看]('"${URL_JOB}"')
+                >构建日志：[点击查看]('"${URL_LOG}"')
+                >构建状态：<font color=#008000>**Success**</font>"
+            }
+        }'
